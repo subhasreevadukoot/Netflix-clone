@@ -1,22 +1,43 @@
 import { set } from 'mongoose'
 import React,{useEffect, useState} from 'react'
 import axios from './axios'
-import './Row.css'
+import './Row.css';
+import Youtube from 'react-youtube'
 const base_url = "https://image.tmdb.org/t/p/original"
-const Row = ({title, fetchUrl, isLargeRow}) => {
-    const [movies,setMovies]= useState([])
+consconst [movies, setMovies] = useState([]);
+const [trailerUrl, setTrailerUrl] = useState("");
 
-    useEffect(() => {
-        async function fetchData(){
-            const request = await axios.get(fetchUrl);
-            setMovies(request.data.results);
-            return request
-        }
-      fetchData()
-        //if [] run once when the component loads, and dont load againm
-        //any variable u use inside ur react hooks has to be given as a dependancy otherwise it wont rerender with the variable info
-    }, [fetchUrl])
-    console.log(movies)
+useEffect(() => {
+
+  async function fetchData() {
+
+    const request = await axios.get(fetchUrl);
+    setMovies(request.data.results);
+    return request;
+  }
+  fetchData();
+}, [fetchUrl]);
+
+const opts = {
+  height: "390",
+  width: "99%",
+  playerVars: {
+    autoplay: 0,
+  }
+}
+
+const handleClick = (movie) => {
+  // console.table(movie?.title)
+  if (trailerUrl) {
+    setTrailerUrl('')
+  } else {
+    movieTrailer(movie?.title || "")
+      .then(url => {
+        const urlParams = new URLSearchParams(new URL(url).search);
+        setTrailerUrl(urlParams.get('v'));
+      }).catch((error) => console.log(error));
+  }
+
     return (
         <div className='row'>
             {/*title*/}
@@ -33,7 +54,9 @@ const Row = ({title, fetchUrl, isLargeRow}) => {
                 ))}
 
             </div>
-
+            <div style={{ padding: "40px" }}>
+        {trailerUrl && <YouTube videoId={trailerUrl} opts={opts} />}
+      </div>
 
         </div>
     )
